@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+<defs>
+<linearGradient id="sea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0f698f"/><stop offset="1" stop-color="#02273f"/></linearGradient>
+<linearGradient id="fishBody" x1="0" x2="1"><stop offset="0" stop-color="#f7fbff"/><stop offset="0.42" stop-color="#9adfff"/><stop offset="1" stop-color="#3b92d0"/></linearGradient>
+<linearGradient id="fin" x1="0" x2="1"><stop offset="0" stop-color="#ffd670"/><stop offset="1" stop-color="#f38b39"/></linearGradient>
+</defs>
+<rect width="1200" height="800" fill="url(#sea)"/>
+<g opacity="0.35">
+<circle cx="110" cy="155" r="18" fill="#dff8ff"/><circle cx="140" cy="118" r="10" fill="#dff8ff"/><circle cx="910" cy="190" r="14" fill="#dff8ff"/><circle cx="970" cy="128" r="20" fill="#dff8ff"/>
+</g>
+<path d="M0 630 C160 590 300 690 470 640 C680 580 860 705 1200 620 L1200 800 L0 800 Z" fill="#0a4367"/>
+<g transform="translate(188 190)">
+<ellipse cx="350" cy="210" rx="250" ry="145" fill="url(#fishBody)"/>
+<path d="M592 210 L795 92 L744 210 L795 328 Z" fill="#7bc6f4"/>
+<path d="M233 95 L325 12 L422 115 Z" fill="url(#fin)"/>
+<path d="M270 328 L400 432 L500 305 Z" fill="#ffb347"/>
+<path d="M156 212 C105 177 85 142 70 97 C14 135 0 172 0 210 C0 246 18 288 70 323 C86 279 104 246 156 212 Z" fill="#9ddcff"/>
+<circle cx="470" cy="175" r="18" fill="#05243b"/>
+<circle cx="477" cy="168" r="6" fill="#fff"/>
+<path d="M418 232 C456 252 518 252 556 230" fill="none" stroke="#0a4466" stroke-width="8" stroke-linecap="round"/>
+<g opacity="0.35" fill="#ffffff">
+<ellipse cx="295" cy="160" rx="34" ry="18"/><ellipse cx="355" cy="122" rx="36" ry="18"/><ellipse cx="430" cy="132" rx="38" ry="18"/><ellipse cx="260" cy="228" rx="34" ry="18"/><ellipse cx="332" cy="206" rx="36" ry="18"/><ellipse cx="410" cy="214" rx="38" ry="18"/><ellipse cx="490" cy="186" rx="36" ry="18"/>
+</g>
+</g>
+<g transform="translate(840 500) scale(.55)">
+<ellipse cx="180" cy="120" rx="140" ry="82" fill="#8ad1ff"/>
+<path d="M312 120 L422 55 L390 120 L422 184 Z" fill="#5bb7ea"/>
+<circle cx="250" cy="95" r="10" fill="#05243b"/>
+</g>
+</svg>

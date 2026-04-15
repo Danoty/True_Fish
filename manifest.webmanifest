@@ -1,0 +1,9 @@
+{
+  "name": "True Fish Pro Operations Suite",
+  "short_name": "TrueFish Pro",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#04111d",
+  "theme_color": "#0b5cff",
+  "icons": []
+}
