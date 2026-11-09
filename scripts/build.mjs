@@ -9,3 +9,6 @@ const known={};let bundle="// Ready-to-run local / GitHub Pages app. No server b
 for(const [name,file,deps] of modules){const text=read(file),names=exportsOf(text);known[name]=names;bundle+=`const ${name}=(()=>{\n${deps.map(d=>`const {${known[d].join(',')}}=${d};`).join('\n')}\n${strip(text)}\nreturn {${names.join(',')}};\n})();\n`;}
 bundle+='(()=>{\n'+Object.entries(known).map(([name,names])=>`const {${names.join(',')}}=${name};`).join('\n')+'\n'+strip(read('app.js'))+'\n'+strip(read('business-ui.js'))+'\n'+strip(read('hybrid-ui.js'))+'\n'+strip(read('users-ui.js'))+'\n'+strip(read('receipts-ui.js'))+'\n})();\n})();\n';
 writeFileSync(root+'app.bundle.js',bundle);console.log('Built app.bundle.js');
+const cssFiles=['styles.css','theme.css','hybrid.css','access.css'];
+writeFileSync(root+'app.styles.css',cssFiles.map(file=>'/* Source: '+file+' */\n'+read(file)).join('\n\n'));
+console.log('Built app.styles.css with all layout, theme, login and receipt rules.');

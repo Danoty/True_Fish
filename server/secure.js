@@ -21,7 +21,7 @@ function verify(password, hash) {
         return false;
     }
 }
-const publicFiles = new Set(['index.html', 'app.bundle.js', 'styles.css', 'theme.css', 'hybrid.css', 'access.css', 'true-fish-logo.png', 'access-gate.js', 'local-access.js', 'login.html', 'staff-login.js', 'config.js']);
+const publicFiles = new Set(['index.html', 'app.bundle.js', 'styles.css', 'app.styles.css', 'theme.css', 'hybrid.css', 'access.css', 'true-fish-logo.png', 'access-gate.js', 'local-access.js', 'login.html', 'staff-login.js', 'config.js']);
 export function createSecureServer(options = {}) {
     const path = resolve(options.path || process.env.DATABASE_PATH || './data/true-fish-shared.sqlite');
     mkdirSync(dirname(path), { recursive: true, mode: 0o700 });

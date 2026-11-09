@@ -1,5 +1,11 @@
 # True Fish Business Suite — hybrid intelligence edition
 
+## GitHub Pages layout fix — version 7.2.1
+
+Upload **all extracted ZIP contents** into the folder GitHub Pages publishes, keeping index.html at that folder's root. The app now loads one complete `app.styles.css` bundle, with versioned asset URLs and an essential layout fallback. This prevents a missing/stale base stylesheet from leaving oversized navigation and pushing the workspace below the page. After uploading, refresh with Ctrl+F5. Keep the existing browser/path to retain its saved records and accounts.
+
+After changing any of the four source CSS files, run `npm run build` to refresh the published CSS bundle as well as JavaScript.
+
 Boat operations, fuel, finances, customer/supplier documents, crew, maintenance and review controls. No Cloudflare and no automatic external backup service are used.
 
 Version 6 adds a financial business overview, grouped role-centred navigation, activity tiles, global workspace/record search (Ctrl+K), and the True Fish Assistant. The original boat and accounting methods remain available.

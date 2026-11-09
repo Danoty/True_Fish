@@ -1,6 +1,6 @@
 {
   "name": "true-fish-github-pages",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -10,6 +10,6 @@
     "build": "node scripts/build.mjs",
     "start": "node server.js",
     "setup-server": "node scripts/setup-server.mjs",
-    "test": "node tests/ledger.mjs && node tests/storage.mjs && node tests/analytics.mjs && node tests/finance.mjs && node tests/business.mjs && node tests/imports.mjs && node tests/bundle.mjs && node tests/forms.mjs && node tests/theme.mjs && node tests/secure-server.mjs && node tests/intelligence.mjs && node tests/access.mjs && node tests/receipts.mjs"
+    "test": "node tests/ledger.mjs && node tests/storage.mjs && node tests/analytics.mjs && node tests/finance.mjs && node tests/business.mjs && node tests/imports.mjs && node tests/bundle.mjs && node tests/forms.mjs && node tests/theme.mjs && node tests/secure-server.mjs && node tests/intelligence.mjs && node tests/access.mjs && node tests/receipts.mjs && node tests/assets.mjs"
   }
 }
