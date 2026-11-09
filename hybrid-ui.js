@@ -1,0 +1,70 @@
+function hybridNavigation() {
+    const groups = [['BUSINESS', ['Overview', 'Finances', 'Receipts', 'Customers & bills', 'Accounting']], ['OPERATIONS', ['Boat records', 'Fuel stock', 'Fuel debts', 'Donations', 'Crew & maintenance']], ['INTELLIGENCE', ['Assistant', 'Reports', 'Imports & matching']], ['ADMINISTRATION', ['Review & staff', 'Activity', 'Workbook review', 'Settings']]];
+    return groups.map(([title, names]) => `<div class="nav-group">${title}</div>${names.map(name => `<button data-action="navigate" data-tab="${name}" class="${tab === name ? 'selected' : ''}" title="${name}" aria-pressed="${tab === name}"><span class="nav-symbol">${icon(nav.find(n => n[0] === name)?.[1] || 'chart')}</span><span>${name}</span>${name === 'Assistant' ? '<small class="ai-tag">AI</small>' : ''}</button>`).join('')}`).join('');
+}
+function businessSnapshot() { return intelligenceSnapshot(state.records, today()); }
+function cashFigure(n) { return money(shillings(n)); }
+function hybridOverview() {
+    const s = businessSnapshot(), income = Math.max(0, s.income), expenses = Math.max(0, s.expenses), total = Math.max(income, expenses, 1);
+    const cue = (label, value, note, target, color) => `<button class="cue ${color}" data-action="navigate" data-tab="${target}"><span>${label} <span aria-hidden="true">↗</span></span><strong>${value}</strong><small>${note}</small></button>`;
+    return `<div class="role-strip"><span><b>Business owner workspace</b><small>Finance, fleet and decisions in one view</small></span><span class="period-pill">Month to date · ${s.month} → ${s.asOf}</span></div>
+    <section class="hybrid-hero"><div><div class="eyebrow">YOUR BUSINESS. IN FOCUS.</div><h2>Welcome to your<br>business command centre.</h2><p>Keep the books clear. Keep the fleet moving.</p><div class="hero-actions">${button('new', '+ Create transaction', 'primary', 'data-kind="finance"')}${button('navigate', '✦ Ask True Fish', 'hero-assistant', 'data-tab="Assistant"')}</div></div><div class="hero-balance"><span>RECORDED CASH POSITION</span><strong>${cashFigure(s.availableCash)}</strong><small>Cash + M-Pesa + Bank · through today</small><div class="hero-accounts">${s.accounts.map(a => `<span>${esc(FINANCE_ACCOUNTS[a.account] || a.account)}<b>${cashFigure(a.balance)}</b></span>`).join('')}</div></div></section>
+    <div class="workspace-tabs"><b>Business overview</b>${button('navigate', 'Financial statements', 'text-button', 'data-tab="Accounting"')}${button('navigate', 'Fleet performance', 'text-button', 'data-tab="Reports"')}</div>
+    <div class="cue-grid">${cue('Money to collect', cashFigure(s.receivables), 'Unpaid customer invoices', 'Customers & bills', 'cue-green')}${cue('Money to pay', cashFigure(s.payables), 'Unpaid supplier bills', 'Customers & bills', 'cue-blue')}${cue('Fuel on hand', qty(s.fuelLitres) + ' L', s.fuelDays === null ? 'No recent usage estimate' : '~' + s.fuelDays.toFixed(1) + ' days of estimated cover', 'Fuel stock', 'cue-teal')}${cue('Needs attention', String(s.findings.filter(f => f.severity === 'warning').length), 'Checks for you to review', 'Assistant', 'cue-amber')}</div>
+    <div class="business-dashboard-grid"><section class="panel money-panel"><div class="section-head"><div><h2>Profit &amp; loss</h2><p>Accounting result · month to date</p></div>${button('navigate', 'View report ↗', 'text-button', 'data-tab="Accounting"')}</div><div class="profit-value"><strong class="${s.net < 0 ? 'negative' : ''}">${cashFigure(s.net)}</strong><span>NET RESULT${s.valuationIncomplete ? ' · INCOMPLETE FUEL COSTS' : ''}</span></div><div class="horizontal-chart"><div><span>Income<b>${cashFigure(s.income)}</b></span><i><em style="width:${income / total * 100}%"></em></i></div><div class="expense-bar"><span>Expenses<b>${cashFigure(s.expenses)}</b></span><i><em style="width:${expenses / total * 100}%"></em></i></div></div><p class="panel-caption">Accrual basis. Boat daily profit is reported separately.</p></section>
+    <section class="panel priorities"><div class="section-head"><div><h2>Focus for today</h2><p>Based on records through ${s.asOf}</p></div><span class="spark-symbol">✦</span></div>${s.findings.slice(0, 3).map(f => `<button class="priority-item" data-action="navigate" data-tab="${f.tab}"><span class="priority-dot ${f.severity}"></span><span><b>${esc(f.title)}</b><small>${esc(f.detail)}</small></span><span aria-hidden="true">›</span></button>`).join('')}${button('navigate', 'Open all insights →', 'text-button priorities-link', 'data-tab="Assistant"')}</section></div>
+    <section class="panel task-ribbon"><span class="ribbon-label">QUICK CREATE</span>${[['boat', 'Boat day'], ['sale', 'Fuel issue'], ['invoice', 'Invoice'], ['bill', 'Supplier bill'], ['payroll', 'Crew wages']].map(([kind, label]) => button('new', '+ ' + label, 'text-button', `data-kind="${kind}"`)).join('')}</section>
+    ${dailyBoard()}${trendChart()}<section class="panel"><div class="section-head"><div><h2>Latest transactions</h2><p>Your recent activity across the business</p></div>${button('navigate', 'View ledger ↗', 'text-button', 'data-tab="Reports"')}</div>${table(live().slice().sort((a,b) => String(a.correctedAt || a.created).localeCompare(String(b.correctedAt || b.created))).slice(-6))}</section>`;
+}
+function assistantPage() {
+    const s = businessSnapshot();
+    return `<section class="assistant-intro"><div class="assistant-mark">✦</div><div><div class="eyebrow">TRUE FISH INTELLIGENCE</div><h2>A clearer answer. A better next step.</h2><p>Ask about your books, understand cash, and find what needs attention.</p></div><span class="mode-pill">${assistantMode === 'model' ? 'Local AI model' : 'Built-in record analysis'}</span></section>
+    <div class="assistant-layout"><section class="panel chat-panel"><div class="section-head"><div><h2>Ask your business</h2><p>Snapshot as of ${s.asOf} · amounts in KSh</p></div>${button('assistant-clear', 'Clear chat', 'text-button')}</div><div class="assistant-settings"><label>Answer mode<select id="assistant-mode"><option value="records"${selected(assistantMode, 'records')}>Built-in record analysis · available now</option><option value="model"${selected(assistantMode, 'model')}${globalThis.TRUEFISH_SERVER ? '' : ' disabled'}>Local AI · optional server setup</option></select></label><p>${assistantMode === 'model' ? 'Sends your question and a calculated business summary to the AI model configured on your server. No raw notes, contacts or transaction rows are included. AI answers may be wrong; check the reports.' : 'Private, rule-based explanations calculated from your ledger. This mode is not a generative AI model and makes no network requests.'}</p></div>
+    <div class="chat-messages" aria-live="polite">${assistantMessages.length ? assistantMessages.map(m => `<article class="chat-message ${m.role}"><div class="chat-avatar">${m.role === 'user' ? 'YOU' : '✦'}</div><div><b>${m.role === 'user' ? 'You' : m.mode === 'model' ? 'Local AI response' : 'Record analysis'}</b><p>${esc(m.text).replace(/\n/g, '<br>')}</p>${m.tab ? button('navigate', 'Review source report ↗', 'text-button', `data-tab="${m.tab}"`) : ''}${m.asOf ? `<small>Calculated through ${m.asOf} · verify against source records</small>` : ''}</div></article>`).join('') : '<div class="chat-welcome"><span>✦</span><h3>What would you like to understand?</h3><p>Start with a question below, or write your own.</p></div>'}${assistantBusy ? '<p class="assistant-working" role="status">Preparing your answer…</p>' : ''}</div>
+    <div class="prompt-grid">${['Summarise my business', 'What needs attention?', 'Explain my profit', 'Show the 30-day cash scenario'].map(q => button('assistant-prompt', esc(q) + ' ↗', 'prompt-chip', `data-question="${esc(q)}" ${assistantBusy ? 'disabled' : ''}`)).join('')}</div><form id="assistant-form"><label class="sr-only" for="assistant-question">Ask about your business records</label><textarea id="assistant-question" name="question" required maxlength="1500" rows="2" placeholder="Ask about cash, invoices, fuel, profit or next actions…" ${assistantBusy ? 'disabled' : ''}></textarea><button class="primary" type="submit" ${assistantBusy ? 'disabled' : ''}>Ask ✦</button></form><p class="assistant-footnote">Read-only guidance. The assistant cannot post, approve, pay or change your records. Chat is kept only until this page is reloaded.</p></section>
+    <div class="assistant-context"><section class="panel"><div class="section-head"><h2>Live business context</h2></div><div class="context-values">${[['Recorded cash', cashFigure(s.availableCash)], ['Month-to-date net', cashFigure(s.net)], ['Overdue invoices', cashFigure(s.overdueReceivables)], ['Fuel stock', qty(s.fuelLitres) + ' L']].map(([a,b]) => `<div><span>${a}</span><b>${b}</b></div>`).join('')}</div></section><section class="panel scenario-card"><div class="section-head"><h2>30-day cash scenario</h2></div><strong>${cashFigure(s.scenario)}</strong><p>Assumes all invoices and bills due within 30 days are settled, plus accrued crew wages. Includes overdue items. Excludes new trading and other cash movements.</p>${button('assistant-prompt', 'Explain assumptions →', 'text-button', 'data-question="Explain the 30-day cash scenario"')}</section></div></div>
+    <div class="insight-heading"><h2>Checks &amp; next actions</h2><span>${s.findings.length} findings · through ${s.asOf}</span></div><div class="insight-grid">${s.findings.map(f => `<article class="panel insight-card"><span class="insight-status ${f.severity}">${f.severity === 'warning' ? 'REVIEW' : f.severity === 'good' ? 'CHECKED' : 'INFORMATION'}</span><h3>${esc(f.title)}</h3><p>${esc(f.detail)}</p><div>${button('navigate', 'Open workspace →', 'text-button', `data-tab="${f.tab}"`)}${f.ids[0] ? button('detail', 'Source record', 'text-button', `data-id="${esc(f.ids[0])}"`) : ''}</div></article>`).join('')}</div>`;
+}
+async function askAssistant(question) {
+    if (!canAct(localActor(), 'assistant')) return toast('Your account cannot use the assistant.');
+    question = String(question || '').trim().slice(0, 1500);
+    if (!question || assistantBusy) return;
+    const snapshot = businessSnapshot(), mode = assistantMode;
+    assistantMessages.push({ role: 'user', text: question });
+    assistantBusy = true; render();
+    try {
+        let response;
+        if (mode === 'model') {
+            if (!globalThis.TRUEFISH_SERVER) throw Error('Local AI requires server mode. Built-in record analysis is available now.');
+            const result = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question }), signal: AbortSignal.timeout(95000) });
+            const value = await result.json();
+            if (!result.ok) throw Error(value.error || 'AI request failed.');
+            response = { text: value.answer, asOf: value.asOf, tab: 'Accounting' };
+        } else response = { ...answerFromRecords(question, snapshot), asOf: snapshot.asOf };
+        assistantMessages.push({ role: 'assistant', ...response, mode });
+    } catch (e) { assistantMessages.push({ role: 'assistant', text: e.message + ' You can switch to built-in record analysis for an immediate answer.', mode }); }
+    finally { assistantBusy = false; assistantMessages = assistantMessages.slice(-20); render(); }
+}
+function openWorkspaceSearch() {
+    if (saving) return;
+    activeModal = null;
+    dialog('Find a workspace or record', `<form id="workspace-search"><label class="search-dialog-label">Search pages, boat names, dates, references or amounts<input name="query" id="workspace-query" autofocus autocomplete="off" placeholder="Try invoices, Boat 1, fuel or 2026-11…"></label></form><div id="workspace-results">${workspaceResults('')}</div>`);
+    document.querySelector('#workspace-query')?.focus();
+}
+function workspaceResults(query) {
+    const q = String(query).trim().toLowerCase(), pages = nav.filter(([name]) => !q || name.toLowerCase().includes(q));
+    const records = q ? live().filter(r => [r.date, r.boat, r.name, r.number, r.reference, r.title, r.note, r.amount, labels[r.kind], BUSINESS_LABELS[r.kind]].some(v => String(v || '').toLowerCase().includes(q))).slice(-12).reverse() : [];
+    return `<div class="search-section-label">WORKSPACES</div>${pages.map(([name]) => button('search-navigate', esc(name) + ' →', 'search-result', `data-tab="${name}"`)).join('') || '<p class="footnote">No matching workspaces</p>'}${q ? `<div class="search-section-label">RECORDS · UP TO 12 MATCHES</div>${records.map(r => button('search-detail', esc(r.date + ' · ' + (labels[r.kind] || BUSINESS_LABELS[r.kind]) + ' · ' + (r.boat || r.name || r.number || r.reference || r.title || 'Record')), 'search-result', `data-id="${r.id}"`)).join('') || '<p class="footnote">No matching records</p>'}` : ''}`;
+}
+document.addEventListener('click', e => {
+    const b = e.target.closest('[data-action]'); if (!b || b.disabled) return;
+    if (b.dataset.action === 'assistant-prompt') askAssistant(b.dataset.question);
+    if (b.dataset.action === 'assistant-clear' && !assistantBusy) { assistantMessages = []; render(); }
+    if (b.dataset.action === 'workspace-search') openWorkspaceSearch();
+    if (b.dataset.action === 'search-navigate') { close(); tab = b.dataset.tab; render(); }
+    if (b.dataset.action === 'search-detail') { close(); detail(b.dataset.id); }
+});
+document.addEventListener('change', e => { if (e.target.id === 'assistant-mode') { assistantMode = e.target.value === 'model' && globalThis.TRUEFISH_SERVER ? 'model' : 'records'; render(); } });
+document.addEventListener('input', e => { if (e.target.id === 'workspace-query') document.querySelector('#workspace-results').innerHTML = workspaceResults(e.target.value); });
+document.addEventListener('submit', e => { if (e.target.id === 'assistant-form') { e.preventDefault(); askAssistant(new FormData(e.target).get('question')); } if (e.target.id === 'workspace-search') e.preventDefault(); });
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openWorkspaceSearch(); } });

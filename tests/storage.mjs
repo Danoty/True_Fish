@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {BrowserLedger,checkBackup} from '../storage.js';
+const memory=new Map(),storage={getItem:k=>memory.has(k)?memory.get(k):null,setItem:(k,v)=>memory.set(k,v)};
+const ledger=new BrowserLedger(storage,'test',null);assert.equal(ledger.read().version,0);
+let state=await ledger.save({action:'add',record:{kind:'opening',date:'2026-11-08',litres:100}},0);
+const opening=state.records[0];
+state=await ledger.save({action:'add',record:{kind:'credit',date:'2026-11-08',boat:'Boat 1',litres:20,price:200}},state.version);
+assert.equal(new BrowserLedger(storage,'test',null).read().records.length,2);
+await assert.rejects(ledger.save({action:'add',record:{kind:'opening',date:'2026-11-08',litres:1}},0),/changed/);
+await assert.rejects(ledger.save({action:'void',id:opening.id,reason:'test'},state.version),/Insufficient/);
+await assert.rejects(ledger.save({action:'add',record:{kind:'repayment',date:'2026-11-08',boat:'Boat 1',litres:21,cash:4200}},state.version),/exceeds/);
+const backup=JSON.parse(JSON.stringify(state));assert.equal(checkBackup(backup).records.length,2);
+state=await ledger.save({action:'add',record:{kind:'repayment',date:'2026-11-08',boat:'Boat 1',litres:10,cash:2000}},state.version);
+state=await ledger.restore(backup,state.version);assert.equal(state.records.length,2);assert.equal(state.version,4);
+assert.throws(()=>checkBackup({schema:1,version:0,records:[{id:'bad'}],audit:[]}),/valid/);
+const quota=new BrowserLedger({getItem:()=>null,setItem:()=>{throw Error('Quota exceeded');}},'quota',null);
+await assert.rejects(quota.save({action:'add',record:{kind:'opening',date:'2026-11-08',litres:1}},0),/Quota/);
+console.log('Passed: browser storage, persistence, stale saves, stock/debt guards, backup restore and storage failures.');
+// Corrections replace a record atomically and preserve the original chronological position.
+const replacement=await ledger.save({action:'replace',id:opening.id,reason:'Correct opening count',record:{kind:'opening',date:'2026-11-08',litres:120}},state.version);
+assert.equal(replacement.records.find(r=>r.id===opening.id).void,true);
+assert.equal(replacement.records.find(r=>r.replaces===opening.id).created,opening.created);
+assert.equal(replacement.records.find(r=>r.replaces===opening.id).replaces,opening.id);
+assert.equal(replacement.audit.length,state.audit.length+2);
+assert.equal(ledger.readRecovery().version,state.version);
+await assert.rejects(ledger.save({action:'replace',id:replacement.records.find(r=>r.replaces===opening.id).id,reason:'Too low',record:{kind:'opening',date:'2026-11-08',litres:1}},replacement.version),/Insufficient/);
+assert.equal(ledger.read().version,replacement.version);
+memory.set('test','not valid json');
+await assert.rejects(ledger.restore(backup,0),/could not be read/);
+const repaired=await ledger.restore(backup,null);assert.equal(repaired.records.length,backup.records.length);
+console.log('Passed: atomic corrections, audit preservation, failed correction rollback, previous-save recovery and corrupt-ledger restore.');
+

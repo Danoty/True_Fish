@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {validate,validateLedger} from '../ledger.js';
+import {isReceiptRecord,receiptNumber,receiptFor} from '../receipts.js';
+let seq=0;const r=(kind,fields)=>({...validate({kind,date:'2026-11-10',...fields}),id:'receipt-'+(++seq),created:'2026-11-10T10:00:00Z',enteredByName:'Cashier'});
+const customer=r('party',{name:'Customer <A>',partyType:'customer'}),invoice=r('invoice',{partyId:customer.id,number:'INV-100',amount:1000,dueDate:'2026-11-30'}),collection=r('finance',{transactionType:'invoice_receipt',documentId:invoice.id,amount:400,account:'mpesa',reference:'MPESA123',note:'Part payment'}),sale=r('sale',{boat:'Boat 1',litres:10,price:200,cash:2000}),opening=r('opening',{litres:20}),sourceReceipt=r('finance',{transactionType:'source_receipt',sourceId:sale.id,amount:1000,account:'cash'});
+const records=[customer,invoice,collection,opening,sale,sourceReceipt];validateLedger(records);
+const before=JSON.stringify(records),receipt=receiptFor(records,collection.id,'True Fish Ent.');assert.equal(receipt.amount,40000);assert.equal(receipt.payer,'Customer <A>');assert.equal(receipt.method,'M-Pesa');assert.match(receipt.description,/INV-100/);assert.equal(receipt.reference,'MPESA123');assert.equal(receipt.receivedBy,'Cashier');assert.equal(JSON.stringify(records),before);
+assert.equal(receiptFor(records,sourceReceipt.id,'True Fish').payer,'Boat 1');assert.equal(receiptFor(records,sourceReceipt.id,'True Fish').amount,100000);assert.throws(()=>receiptFor(records,sale.id,'True Fish'),/saved incoming cashbook/);
+for(const type of ['opening','transfer','expense','source_payment','bill_payment','payroll_payment','drawing','loan_repay','reconcile','loan_opening'])assert.equal(isReceiptRecord({kind:'finance',transactionType:type,amount:100}),false,type);
+for(const type of ['income','capital','loan_in','source_receipt','invoice_receipt'])assert.equal(isReceiptRecord({kind:'finance',transactionType:type,amount:100}),true,type);
+assert.equal(isReceiptRecord({kind:'finance',transactionType:'income',amount:0}),false);
+const corrected={...collection,id:'receipt-corrected',replaces:collection.id,amount:350};collection.void=true;collection.voidReason='Amount corrected';records.push(corrected);const old=receiptFor(records,collection.id,'True Fish'),updated=receiptFor(records,corrected.id,'True Fish');assert.equal(old.voided,true);assert.equal(old.replacement,updated.number);assert.equal(updated.replaces,old.number);assert.equal(updated.amount,35000);
+assert.notEqual(receiptNumber({...collection,id:'abc'}),receiptNumber({...collection,id:'ABC'}));assert.notEqual(receiptNumber({...collection,id:'a-bc'}),receiptNumber({...collection,id:'ab-c'}));
+console.log('Passed: receipt eligibility, exact partial payments, invoice/source links, stable unique identifiers, correction/void history and no ledger mutation.');
