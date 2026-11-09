@@ -1,5 +1,7 @@
 # True Fish Business Suite — hybrid intelligence edition
 
+Version 7.3 adds the logo to every printable report and downloaded business document. Report downloads are self-contained branded HTML files with an embedded logo and Print / Save as PDF option. Restore backups and import templates remain data files. See DOCUMENTS.md.
+
 ## GitHub Pages layout fix — version 7.2.1
 
 Upload **all extracted ZIP contents** into the folder GitHub Pages publishes, keeping index.html at that folder's root. The app now loads one complete `app.styles.css` bundle, with versioned asset URLs and an essential layout fallback. This prevents a missing/stale base stylesheet from leaving oversized navigation and pushing the workspace below the page. After uploading, refresh with Ctrl+F5. Keep the existing browser/path to retain its saved records and accounts.

@@ -1,5 +1,5 @@
 (() => {
-    function launch() { const script = document.createElement('script'); script.src = 'app.bundle.js?v=7.2.1'; script.onerror = () => { const root = document.querySelector('#app'); root.innerHTML = '<div class="error" role="alert">The application files could not load. Upload every file from the latest ZIP to the GitHub Pages folder, then refresh this page. Your saved records have not been deleted.</div>'; }; script.defer = true; document.head.append(script); }
+    function launch() { const script = document.createElement('script'); script.src = 'app.bundle.js?v=7.3.0'; script.onerror = () => { const root = document.querySelector('#app'); root.innerHTML = '<div class="error" role="alert">The application files could not load. Upload every file from the latest ZIP to the GitHub Pages folder, then refresh this page. Your saved records have not been deleted.</div>'; }; script.defer = true; document.head.append(script); }
     if (globalThis.TRUEFISH_SERVER) return launch();
     const path = location.pathname.replace(/index\.html$/, ''), key = 'true-fish-pages:' + path;
     // Retain records saved by the original local-file edition.

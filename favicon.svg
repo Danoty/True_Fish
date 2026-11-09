@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="True Fish">
+  <rect width="64" height="64" rx="14" fill="#effbfc"/>
+  <path d="M7 26l12 6C30 14 47 12 58 23c-5 15-23 25-38 17L7 49l6-13z" fill="#075371"/>
+  <path d="M24 33c8-8 17-12 27-10-7 9-17 14-27 14z" fill="#fff"/>
+  <path d="M32 33c0-5 4-9 9-11l-4 10z" fill="#ff826c"/>
+  <path d="M27 20c-1-5-5-7-10-7 6-4 15-5 22-2z" fill="#00a79d"/>
+  <circle cx="49" cy="21" r="2.5" fill="#fff"/>
+  <path d="M8 48c12-16 23-5 32-6 7 0 13-3 18-7-5 11-13 15-22 13-10-3-18-3-28 0z" fill="#00a79d"/>
+  <path d="M11 54c11-8 20 1 30-2 6-2 10-3 14-6-5 9-13 12-22 10-7-2-14-4-22-2z" fill="#69d6bf"/>
+</svg>

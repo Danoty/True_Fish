@@ -21,7 +21,7 @@ function verify(password, hash) {
         return false;
     }
 }
-const publicFiles = new Set(['index.html', 'app.bundle.js', 'styles.css', 'app.styles.css', 'theme.css', 'hybrid.css', 'access.css', 'true-fish-logo.png', 'access-gate.js', 'local-access.js', 'login.html', 'staff-login.js', 'config.js']);
+const publicFiles = new Set(['index.html', 'app.bundle.js', 'styles.css', 'app.styles.css', 'theme.css', 'hybrid.css', 'access.css', 'true-fish-logo.png', 'favicon.ico', 'favicon.svg', 'favicon-32.png', 'apple-touch-icon.png', 'access-gate.js', 'local-access.js', 'login.html', 'staff-login.js', 'config.js']);
 export function createSecureServer(options = {}) {
     const path = resolve(options.path || process.env.DATABASE_PATH || './data/true-fish-shared.sqlite');
     mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
@@ -198,7 +198,7 @@ export function createSecureServer(options = {}) {
                 return res.end();
             }
             const content = file === 'config.js' ? Buffer.from('globalThis.TRUEFISH_SERVER=true;') : await read(resolve(root, file));
-            const type = file.endsWith('.html') ? 'text/html' : file.endsWith('.css') ? 'text/css' : file.endsWith('.png') ? 'image/png' : 'text/javascript';
+            const type = file.endsWith('.html') ? 'text/html' : file.endsWith('.css') ? 'text/css' : file.endsWith('.png') ? 'image/png' : file.endsWith('.svg') ? 'image/svg+xml' : file.endsWith('.ico') ? 'image/x-icon' : 'text/javascript';
             res.writeHead(200, { 'Content-Type': type + '; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; form-action 'self'; base-uri 'self'" });
             res.end(content);
         }

@@ -1,3 +1,5 @@
+import { LOGO_DATA_URI } from './brand-data.js';
+import { brandedReport } from './documents.js';
 import { isReceiptRecord, receiptNumber, receiptFor } from './receipts.js';
 import { ServerLedger } from './server-client.js';
 import { intelligenceSnapshot, answerFromRecords } from './intelligence.js';
@@ -83,7 +85,7 @@ function content() {
         html += fuelReconciliation();
     return html;
 }
-function render() { root.innerHTML = `<div class="shell"><aside><a class="brand" href="./index.html"><img class="suite-logo" src="true-fish-logo.png" alt="True Fish Business Suite"></a><button class="sidebar-create" data-action="new" data-kind="finance">＋ Create new</button><nav aria-label="Main navigation">${hybridNavigation()}</nav><div class="aside-bottom"><div class="fleet-icon">${icon('boat', 26)}</div><b>Built around your business.</b><p>Financial clarity. Operational control.</p><span class="private">● ${globalThis.TRUEFISH_SERVER ? 'Shared server ledger' : 'Saved in this browser'}</span></div><div class="company"><div>TF</div><span><b>${esc(preferences.company)}</b><small>KSh · East Africa</small></span></div></aside><main><header><div class="breadcrumb"><span class="app-launcher" aria-hidden="true">⠿</span><span>True Fish <b>Business Suite</b></span></div><button class="global-search" data-action="workspace-search"><span>⌕</span> Search anything <kbd>Ctrl K</kbd></button>${button('navigate', '✦ Assistant', 'header-assistant', 'data-tab="Assistant"')}${profileSelector()}<span class="date">${new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Nairobi', day: 'numeric', month: 'short', year: 'numeric' })}</span></header><div class="content"><div class="page-heading"><div><div class="eyebrow">${esc(preferences.company.toUpperCase())}</div><h1>${tab === 'Overview' ? 'Business overview' : tab}</h1><p>${descriptions[tab]}</p></div><div class="actions">${button('export', '↓ Export CSV', 'secondary', ready && (tab === 'Finances' ? financeReport(state.records, financeScope()).entries.length : rows().length) ? '' : 'disabled')}${button('new', '+ Add record', 'primary', `data-kind="${defaultRecordKind()}" ${ready ? '' : 'disabled'}`)}</div></div>${error ? `<div class="error" role="alert">${esc(error)} ${button('refresh', 'Refresh records', 'text-button')}</div>` : ''}${ready ? '' : '<div class="notice">Reading this browser’s records…</div>'}<div class="storage-strip"><span>● ${globalThis.TRUEFISH_SERVER ? 'Shared server ledger' : 'Saved in this browser'} · ${esc(backupLabel())}</span>${button('backup', 'Download backup', 'text-button')}</div>${content()}<footer><span>${esc(preferences.company.toUpperCase())} / Built for the working day</span><div class="top-actions">${button('refresh', '↻ Refresh records', 'text-button')}${button('backup', 'Download backup', 'text-button')}${button('restore', 'Restore backup', 'text-button')}</div></footer></div></main></div>`; applyRightsUI(); }
+function render() { root.innerHTML = `<div class="shell"><aside><a class="brand" href="./index.html"><img class="suite-logo" src="true-fish-logo.png" alt="True Fish Business Suite"></a><button class="sidebar-create" data-action="new" data-kind="finance">＋ Create new</button><nav aria-label="Main navigation">${hybridNavigation()}</nav><div class="aside-bottom"><div class="fleet-icon">${icon('boat', 26)}</div><b>Built around your business.</b><p>Financial clarity. Operational control.</p><span class="private">● ${globalThis.TRUEFISH_SERVER ? 'Shared server ledger' : 'Saved in this browser'}</span></div><div class="company"><div>TF</div><span><b>${esc(preferences.company)}</b><small>KSh · East Africa</small></span></div></aside><main><header><div class="breadcrumb"><span class="app-launcher" aria-hidden="true">⠿</span><span>True Fish <b>Business Suite</b></span></div><button class="global-search" data-action="workspace-search"><span>⌕</span> Search anything <kbd>Ctrl K</kbd></button>${button('navigate', '✦ Assistant', 'header-assistant', 'data-tab="Assistant"')}${profileSelector()}<span class="date">${new Date().toLocaleDateString('en-GB', { timeZone: 'Africa/Nairobi', day: 'numeric', month: 'short', year: 'numeric' })}</span></header><div class="content">${printBrand()}<div class="page-heading"><div><div class="eyebrow">${esc(preferences.company.toUpperCase())}</div><h1>${tab === 'Overview' ? 'Business overview' : tab}</h1><p>${descriptions[tab]}</p></div><div class="actions">${button('export', '↓ Download report', 'secondary', ready && (tab === 'Finances' ? financeReport(state.records, financeScope()).entries.length : rows().length) ? '' : 'disabled')}${button('new', '+ Add record', 'primary', `data-kind="${defaultRecordKind()}" ${ready ? '' : 'disabled'}`)}</div></div>${error ? `<div class="error" role="alert">${esc(error)} ${button('refresh', 'Refresh records', 'text-button')}</div>` : ''}${ready ? '' : '<div class="notice">Reading this browser’s records…</div>'}<div class="storage-strip"><span>● ${globalThis.TRUEFISH_SERVER ? 'Shared server ledger' : 'Saved in this browser'} · ${esc(backupLabel())}</span>${button('backup', 'Download backup', 'text-button')}</div>${content()}<footer><span>${esc(preferences.company.toUpperCase())} / Built for the working day</span><div class="top-actions">${button('refresh', '↻ Refresh records', 'text-button')}${button('backup', 'Download backup', 'text-button')}${button('restore', 'Restore backup', 'text-button')}</div></footer></div></main></div>`; applyRightsUI(); }
 function toast(text) { const el = document.querySelector('#toast'); el.textContent = '✓ ' + text; el.hidden = false; setTimeout(() => el.hidden = true, 4000); }
 async function load() {
     try {
@@ -100,7 +102,7 @@ async function load() {
     }
     render();
 }
-function exportCSV(data, name) {
+function exportDataCSV(data, name) {
     const keys = [...new Set(data.flatMap(r => Object.keys(r)))];
     if (!keys.length)
         return toast('No rows to export.');
@@ -243,14 +245,14 @@ document.addEventListener('click', e => {
         else if (tab === 'Finances')
             exportFinancialCashbook();
         else
-            exportCSV(rows().map(r => ({ ...r, ...(r.kind === 'boat' ? profit(r) : {}) })), 'true-fish-records');
+            exportReport(rows().map(r => ({ ...r, ...(r.kind === 'boat' ? profit(r) : {}) })), 'true-fish-records');
     }
     if (a === 'audit-export')
-        exportCSV(state.audit, 'true-fish-audit');
+        exportReport(state.audit, 'true-fish-audit');
     if (a === 'reference-export') {
         const s = reference[Number(b.dataset.index)];
         if (s)
-            exportCSV(s.rows, s.sheet);
+            exportReport(s.rows, s.sheet);
     }
     if (a === 'print')
         window.print();
@@ -453,11 +455,11 @@ document.addEventListener('click', async (e) => {
     }
     if (action === 'day-export') {
         const d = daySummary(live(), focusDate);
-        exportCSV([{ date: focusDate, boatsRecorded: d.boats, income: d.income, netProfit: d.net, fuelIssuedLitres: d.fuel.sold + d.fuel.credit + d.fuel.donated, fuelSalesValue: d.fuel.salesValue, fuelSalesCash: d.fuel.salesCash, fuelCashDifference: d.fuel.variance, debtCashReceived: d.fuel.repaymentCash }], 'true-fish-day-' + focusDate);
+        exportReport([{ date: focusDate, boatsRecorded: d.boats, income: d.income, netProfit: d.net, fuelIssuedLitres: d.fuel.sold + d.fuel.credit + d.fuel.donated, fuelSalesValue: d.fuel.salesValue, fuelSalesCash: d.fuel.salesCash, fuelCashDifference: d.fuel.variance, debtCashReceived: d.fuel.repaymentCash }], 'true-fish-day-' + focusDate);
     }
     if (action === 'fuel-report-export') {
         const r = reconcile(rows());
-        exportCSV([{ from: filter.start, to: filter.end, boat: filter.boat || 'All boats', ...r }], 'true-fish-fuel-reconciliation');
+        exportReport([{ from: filter.start, to: filter.end, boat: filter.boat || 'All boats', ...r }], 'true-fish-fuel-reconciliation');
     }
     if (action === 'recover') {
         try {
@@ -575,11 +577,11 @@ document.addEventListener('click', e => {
     }
     if (action === 'finance-export') {
         const report = financeReport(state.records, financeScope());
-        exportCSV(report.entries.map(r => ({ date: r.date, type: FINANCE_TYPES[r.transactionType], account: FINANCE_ACCOUNTS[r.account] || 'Loan liability', toAccount: FINANCE_ACCOUNTS[r.toAccount] || '', category: r.categoryLabel, counterparty: r.counterparty, reference: r.reference, amount: r.amount, cashIn: shillings(r.cashIn), cashOut: shillings(r.cashOut), recordedBalance: shillings(r.balance), note: r.note })), 'true-fish-cashbook');
+        exportReport(report.entries.map(r => ({ date: r.date, type: FINANCE_TYPES[r.transactionType], account: FINANCE_ACCOUNTS[r.account] || 'Loan liability', toAccount: FINANCE_ACCOUNTS[r.toAccount] || '', category: r.categoryLabel, counterparty: r.counterparty, reference: r.reference, amount: r.amount, cashIn: shillings(r.cashIn), cashOut: shillings(r.cashOut), recordedBalance: shillings(r.balance), note: r.note })), 'true-fish-cashbook');
     }
     if (action === 'trial-export') {
         const report = financeReport(state.records, { end: filter.end });
-        exportCSV(report.trialBalance.map(r => ({ account: r.name, debit: shillings(r.debit), credit: shillings(r.credit) })), 'true-fish-cashbook-trial-balance');
+        exportReport(report.trialBalance.map(r => ({ account: r.name, debit: shillings(r.debit), credit: shillings(r.credit) })), 'true-fish-cashbook-trial-balance');
     }
 });
 document.addEventListener('change', e => {
@@ -605,4 +607,4 @@ document.addEventListener('submit', e => {
     error = '';
     render();
 });
-function exportFinancialCashbook() { const report = financeReport(state.records, financeScope()); exportCSV(report.entries.map(r => ({ date: r.date, type: FINANCE_TYPES[r.transactionType], account: FINANCE_ACCOUNTS[r.account] || 'Loan liability', toAccount: FINANCE_ACCOUNTS[r.toAccount] || '', category: r.categoryLabel, counterparty: r.counterparty, reference: r.reference, amount: r.amount, cashIn: shillings(r.cashIn), cashOut: shillings(r.cashOut), recordedBalance: shillings(r.balance), note: r.note })), 'true-fish-cashbook'); }
+function exportFinancialCashbook() { const report = financeReport(state.records, financeScope()); exportReport(report.entries.map(r => ({ date: r.date, type: FINANCE_TYPES[r.transactionType], account: FINANCE_ACCOUNTS[r.account] || 'Loan liability', toAccount: FINANCE_ACCOUNTS[r.toAccount] || '', category: r.categoryLabel, counterparty: r.counterparty, reference: r.reference, amount: r.amount, cashIn: shillings(r.cashIn), cashOut: shillings(r.cashOut), recordedBalance: shillings(r.balance), note: r.note })), 'true-fish-cashbook'); }

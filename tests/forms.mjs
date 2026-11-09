@@ -2,7 +2,7 @@ import {financeReport} from '../finance.js';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
-const handlers={},dialogHandlers={},memory=new Map(),ids=new Map();let form=null;
+const handlers={},dialogHandlers={},memory=new Map(),ids=new Map();let form=null,downloadedBlob=null,downloadedName='';
 const values={};
 const node=()=>({innerHTML:'',textContent:'',hidden:true,focus(){},addEventListener(){},querySelector(){return null;},querySelectorAll(){return [];}});
 const root=node(),dialogs=node();
@@ -62,3 +62,7 @@ await click('staff-edit',{id:testUser.id});assert.match(dialogs.innerHTML,/Save 
 console.log('Passed: user creation and assigned permission form submission.');
 await click('navigate',{tab:'Receipts'});assert.match(root.innerHTML,/Payment receipts/);assert.match(root.innerHTML,/Customer A/);const savedReceipt=ledger().records.find(r=>r.transactionType==='invoice_receipt');const receiptBefore=memory.get('true-fish-pages:/test/');await click('receipt-view',{id:savedReceipt.id});assert.match(dialogs.innerHTML,/id="receipt-document"/);assert.match(dialogs.innerHTML,/true-fish-logo.png/);assert.match(dialogs.innerHTML,/KSh 400.00/);assert.match(dialogs.innerHTML,/Print \/ Save as PDF/);assert.equal(memory.get('true-fish-pages:/test/'),receiptBefore);await click('close');
 console.log('Passed: receipt register, branded receipt preview, exact saved payment and no duplicate posting.');
+context.URL={createObjectURL(blob){downloadedBlob=blob;return 'blob:test-export';},revokeObjectURL(){}};context.document.createElement=()=>({click(){downloadedName=this.download;}});
+const exportBefore=memory.get('true-fish-pages:/test/');await click('navigate',{tab:'Reports'});await click('export');assert.match(downloadedName,/\.html$/);assert.match(await downloadedBlob.text(),/data:image\/png;base64,/);assert.match(await downloadedBlob.text(),/TEST FLEET|Test Fleet/);assert.equal(memory.get('true-fish-pages:/test/'),exportBefore);
+await click('import-template');assert.match(downloadedName,/template\.csv$/);assert.match(downloadedBlob.type,/text\/csv/);assert.doesNotMatch(await downloadedBlob.text(),/data:image/);
+console.log('Passed: business report downloads embed the logo and CSV import templates remain compatible.');

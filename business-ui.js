@@ -160,13 +160,13 @@ document.addEventListener('click', async (e) => {
     if (a === 'business-export') {
         const report = accountingReport(state.records, { start: filter.start, end: filter.end || today() });
         if (b.dataset.report === 'trial')
-            exportCSV(report.trial.map(r => ({ account: r.name, debit: shillings(r.debit), credit: shillings(r.credit) })), 'true-fish-full-trial');
+            exportReport(report.trial.map(r => ({ account: r.name, debit: shillings(r.debit), credit: shillings(r.credit) })), 'true-fish-full-trial');
         if (b.dataset.report === 'pnl')
-            exportCSV([...report.income.map(r => ({ type: 'Income', ...r, amount: shillings(r.amount) })), ...report.expenses.map(r => ({ type: 'Expense', ...r, amount: shillings(r.amount) })), { type: 'Result', name: 'Profit / loss', amount: shillings(report.net) }], 'true-fish-profit-loss');
+            exportReport([...report.income.map(r => ({ type: 'Income', ...r, amount: shillings(r.amount) })), ...report.expenses.map(r => ({ type: 'Expense', ...r, amount: shillings(r.amount) })), { type: 'Result', name: 'Profit / loss', amount: shillings(report.net) }], 'true-fish-profit-loss');
         if (b.dataset.report === 'balance')
-            exportCSV([{ item: 'Assets', amount: shillings(report.assets) }, { item: 'Liabilities', amount: shillings(report.liabilities) }, { item: 'Opening equity / owner movements', amount: shillings(report.equity) }, { item: 'Accumulated profit / loss', amount: shillings(report.retained) }, { item: 'Balance difference', amount: shillings(report.balanceDifference) }], 'true-fish-balance-sheet');
+            exportReport([{ item: 'Assets', amount: shillings(report.assets) }, { item: 'Liabilities', amount: shillings(report.liabilities) }, { item: 'Opening equity / owner movements', amount: shillings(report.equity) }, { item: 'Accumulated profit / loss', amount: shillings(report.retained) }, { item: 'Balance difference', amount: shillings(report.balanceDifference) }], 'true-fish-balance-sheet');
         if (b.dataset.report === 'documents')
-            exportCSV([...partyOutstanding(state.records, 'invoice', filter.end || today()), ...partyOutstanding(state.records, 'bill', filter.end || today())].map(r => ({ type: r.kind, party: r.partyName, number: r.number, date: r.date, dueDate: r.dueDate, total: shillings(documentTotal(r)), balance: shillings(r.balance), overdue: r.overdue })), 'true-fish-documents');
+            exportReport([...partyOutstanding(state.records, 'invoice', filter.end || today()), ...partyOutstanding(state.records, 'bill', filter.end || today())].map(r => ({ type: r.kind, party: r.partyName, number: r.number, date: r.date, dueDate: r.dueDate, total: shillings(documentTotal(r)), balance: shillings(r.balance), overdue: r.overdue })), 'true-fish-documents');
     }
     if (a === 'import-remap') {
         const data = Object.fromEntries(new FormData(document.querySelector('#import-config')));
@@ -175,7 +175,7 @@ document.addEventListener('click', async (e) => {
     }
     if (a === 'import-template') {
         const kind = importState?.kind || 'boat';
-        exportCSV([Object.fromEntries(IMPORT_FIELDS[kind].map(f => [f, '']))], 'true-fish-' + kind + '-template');
+        exportDataCSV([Object.fromEntries(IMPORT_FIELDS[kind].map(f => [f, '']))], 'true-fish-' + kind + '-template');
     }
     if (a === 'import-commit') {
         try {

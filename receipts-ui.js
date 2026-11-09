@@ -20,5 +20,5 @@ function openReceipt(id) {
         dialog('Payment receipt', `<div class="receipt-controls no-print">${button('receipt-print','Print / Save as PDF','primary',`data-id="${esc(id)}"`)}${button('close','Close','secondary')}</div>${receipt}`);
     } catch(e) { toast(e.message); }
 }
-function exportReceipts() { exportCSV(receiptModels().map(r => ({receipt:r.number,date:r.date,payer:r.payer,account:r.method,reference:r.reference,amount:shillings(r.amount),status:r.voided?'VOIDED':'Recorded',record:r.recordId})),'true-fish-receipts'); }
+function exportReceipts() { exportReport(receiptModels().map(r => ({receipt:r.number,date:r.date,payer:r.payer,account:r.method,reference:r.reference,amount:shillings(r.amount),status:r.voided?'VOIDED':'Recorded',record:r.recordId})),'true-fish-receipts'); }
 document.addEventListener('click',e => { const b=e.target.closest('[data-action]');if(!b||b.disabled)return;if(b.dataset.action==='receipt-view')openReceipt(b.dataset.id);if(b.dataset.action==='receipts-export')exportReceipts();if(b.dataset.action==='receipt-print'){const previous=document.title;document.title=receiptNumber(state.records.find(r=>r.id===b.dataset.id));window.addEventListener('afterprint',()=>{document.title=previous;},{once:true});window.print();} });

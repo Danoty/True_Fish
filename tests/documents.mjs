@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {brandedReport} from '../documents.js';
+import {LOGO_DATA_URI} from '../brand-data.js';
+const data=[{date:'2026-11-10',description:'<script>alert(1)</script>',amount:1234.56}],before=JSON.stringify(data);
+const result=brandedReport(data,{company:'True Fish & Co',title:'Cashbook',logo:LOGO_DATA_URI,period:'All dates',generated:'10/11/2026 EAT',preparedBy:'Owner'});
+assert.ok(result.includes('<img src="'+LOGO_DATA_URI+'"'));assert.match(result,/True Fish &amp; Co/);assert.match(result,/1234.56/);assert.match(result,/&lt;script&gt;alert\(1\)&lt;\/script&gt;/);assert.doesNotMatch(result,/<script>alert/);assert.equal(JSON.stringify(data),before);assert.match(result,/Print \/ Save as PDF/);assert.doesNotMatch(result,/(?:src|href)="https?:/);
+const embedded=Buffer.from(LOGO_DATA_URI.split(',')[1],'base64'),original=readFileSync(new URL('../true-fish-logo.png',import.meta.url));assert.deepEqual(embedded,original);
+assert.throws(()=>brandedReport(data,{logo:'https://example.com/logo.png'}),/logo/);
+const wide=brandedReport([Object.fromEntries(Array.from({length:12},(_,i)=>['field'+i,'Value '+i]))],{logo:LOGO_DATA_URI,company:'True Fish',title:'Records'});assert.match(wide,/class="entry"/);assert.match(wide,/Value 11/);
+const app=readFileSync(new URL('../app.js',import.meta.url),'utf8');assert.match(app,/\$\{printBrand\(\)\}/);assert.match(app,/function exportDataCSV/);const ui=readFileSync(new URL('../business-ui.js',import.meta.url),'utf8');assert.match(ui,/exportDataCSV\(\[Object\.fromEntries\(IMPORT_FIELDS/);assert.doesNotMatch(app+ui+readFileSync(new URL('../receipts-ui.js',import.meta.url),'utf8'),/exportCSV\(/);
+console.log('Passed: embedded exact logo, offline branded downloads, escaped report data, wide records, print branding and preserved machine-readable templates.');

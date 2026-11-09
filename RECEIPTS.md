@@ -20,7 +20,7 @@ The receipt number combines the payment date and full saved ledger ID. It is sta
 
 Correcting a payment keeps the original voided record and produces a new numbered receipt for the replacement. The old receipt is clearly marked VOIDED and points to the replacement. The replacement points back to the original. A previously downloaded or printed copy cannot update itself; retrieve the current receipt from the system to check its status.
 
-The register includes voided receipts for history. Its money-received total excludes voided entries and includes capital and loan proceeds as well as operating receipts. Filters apply to payment date, payer/reference text and linked boat. Export receipt register produces a CSV, not additional accounting entries.
+The register includes voided receipts for history. Its money-received total excludes voided entries and includes capital and loan proceeds as well as operating receipts. Filters apply to payment date, payer/reference text and linked boat. Export receipt register produces a branded HTML document with an embedded logo, not additional accounting entries. Open it to print or save as PDF.
 
 These documents acknowledge recorded payments; they are labelled **not a tax invoice**. No fiscal/e-invoicing certification or submission is added. All signed-in users who can view the business records can view and print receipts.
 

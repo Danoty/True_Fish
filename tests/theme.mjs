@@ -5,9 +5,9 @@ const luminance=hex=>{const [r,g,b]=hex.match(/[0-9a-f]{2}/gi).map(v=>linear(par
 const ratio=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
 const pairs=[['body text','#172B45','#F3F6FB'],['muted text','#5B6D82','#FFFFFF'],['primary button','#FFFFFF','#0B716A'],['sidebar text','#C4D2E3','#10283F'],['active navigation','#EBFFFF','#164D59'],['income text','#137D56','#FFFFFF'],['fuel text','#2563EB','#FFFFFF'],['debt label','#8B5208','#FFF5E3'],['error text','#9D3030','#FFF0F0'],['hero secondary text','#CCE0ED','#13556A']];
 for(const [name,foreground,background] of pairs)assert.ok(ratio(foreground,background)>=4.5,name+' contrast is too low: '+ratio(foreground,background));
-const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/href="app.styles.css\?v=7\.2\.1"/);
+const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/href="app.styles.css\?v=7\.3\.0"/);
 const css=readFileSync(new URL('../theme.css',import.meta.url),'utf8');assert.match(css,/prefers-reduced-motion/);assert.match(css,/:focus-visible/);assert.match(css,/@media print/);
 const app=readFileSync(new URL('../app.js',import.meta.url),'utf8')+readFileSync(new URL('../hybrid-ui.js',import.meta.url),'utf8');assert.match(app,/aria-pressed/);assert.match(app,/stroke-dasharray="6 4"/);
 for(const [name,fg,bg] of [['hybrid text','#182D39','#F3F6F7'],['hybrid muted','#576C78','#FFFFFF'],['create button','#FFFFFF','#167347'],['sidebar','#D3E1E5','#132C35'],['hero text','#143D30','#EAF3EE'],['cue labels','#4C6874','#FFFFFF'],['assistant copy','#344F5C','#FFFFFF'],['prompt chips','#38606A','#F7FAFA'],['warning label','#8C601F','#FFFFFF']])assert.ok(ratio(fg,bg)>=4.5,name+' contrast '+ratio(fg,bg));
-assert.match(html,/href="app.styles.css\?v=7\.2\.1"/);
+assert.match(html,/href="app.styles.css\?v=7\.3\.0"/);
 console.log('Passed: ten key text/button contrast pairs, theme loading, visible focus, print styles, reduced motion and non-colour chart cues.');
